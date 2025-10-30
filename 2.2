@@ -1,0 +1,108 @@
+import java.io.*;
+import java.util.*;
+
+class AutoboxSum {
+    public static void sumFromInput() {
+        Scanner sc = new Scanner(System.in);
+        List<Integer> numbers = new ArrayList<>();
+        System.out.println("Enter space-separated integers:");
+        String line = sc.nextLine();
+        for (String s : line.trim().split(" ")) {
+            numbers.add(Integer.parseInt(s));
+        }
+        int sum = 0; // unboxing from Integer to int
+        for (Integer n : numbers) sum += n;
+        System.out.println("Total Sum: " + sum);
+    }
+}
+
+class Student implements Serializable {
+    int studentID;
+    String name;
+    String grade;
+    Student(int id, String name, String grade) {
+        this.studentID = id;
+        this.name = name;
+        this.grade = grade;
+    }
+    public String toString() {
+        return studentID + " | " + name + " | " + grade;
+    }
+}
+
+class StudentSerializeDemo {
+    public static void serializeAndDeserialize() {
+        Student s = new Student(101, "Ashish", "A");
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("student.dat"))) {
+            out.writeObject(s);
+        } catch (Exception e) { System.out.println("Serialization Error: " + e); }
+        Student loaded = null;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("student.dat"))) {
+            loaded = (Student) in.readObject();
+        } catch (Exception e) { System.out.println("Deserialization Error: " + e); }
+        System.out.println("Deserialized Student: " + loaded);
+    }
+}
+
+class Employee {
+    String name, designation;
+    int id;
+    double salary;
+    Employee(int id, String name, String designation, double salary) {
+        this.id = id; this.name = name; this.designation = designation; this.salary = salary;
+    }
+    public String toString() {
+        return id + " | " + name + " | " + designation + " | " + salary;
+    }
+}
+
+class EmployeeFileManager {
+    static final String FILENAME = "employees.txt";
+    public static void addEmployee(Employee emp) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME, true))) {
+            bw.write(emp.id + "," + emp.name + "," + emp.designation + "," + emp.salary);
+            bw.newLine();
+        } catch (Exception e) { System.out.println("Write Error: " + e); }
+    }
+    public static void displayAll() {
+        try (BufferedReader br = new BufferedReader(new FileReader(FILENAME))) {
+            String line;
+            System.out.println("All Employees:");
+            while ((line = br.readLine()) != null) {
+                String[] p = line.split(",");
+                System.out.println(p[0] + " | " + p[1] + " | " + p[2] + " | " + p[3]);
+            }
+        } catch (Exception e) { System.out.println("Read Error: " + e); }
+    }
+}
+
+public class JavaCoreDemo {
+    public static void main(String[] args) {
+        // Part a: Sum using autoboxing + parsing
+        AutoboxSum.sumFromInput();
+
+        // Part b: Serialization/Deserialization
+        StudentSerializeDemo.serializeAndDeserialize();
+
+        // Part c: Menu-driven employee management
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            System.out.println("\nMenu: 1.Add Employee 2.Display All 3.Exit");
+            int choice = sc.nextInt(); sc.nextLine();
+            if (choice == 1) {
+                System.out.print("Enter ID: "); int id = sc.nextInt(); sc.nextLine();
+                System.out.print("Enter Name: "); String name = sc.nextLine();
+                System.out.print("Enter Designation: "); String designation = sc.nextLine();
+                System.out.print("Enter Salary: "); double salary = sc.nextDouble(); sc.nextLine();
+                Employee emp = new Employee(id, name, designation, salary);
+                EmployeeFileManager.addEmployee(emp);
+                System.out.println("Employee added.");
+            } else if (choice == 2) {
+                EmployeeFileManager.displayAll();
+            } else if (choice == 3) {
+                System.out.println("Exiting.");
+                break;
+            }
+        }
+    }
+}
